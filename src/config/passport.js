@@ -19,7 +19,6 @@ passport.use('local', new LocalStrategy({ usernameField: 'email', passwordField:
             if(!user) {
                 return done(null, false, { msg: `Email ${email} not found`});
             }
-                
             user.comparePassword(password, (err, isMatch) => {
                 if(err) return done(err);
 
