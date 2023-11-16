@@ -1,9 +1,31 @@
+const cookieSession = require('cookie-session');
 const express = require('express');
 const { default: mongoose } = require('mongoose');
 const app = express();
 const path = require('path');
 const User = require('./models/users.model');
 const passport = require('passport');
+const cookieEncryptionKey = ['key1', 'key2'];
+
+app.use(cookieSession({
+    name: 'cookie-session-name',
+    keys: cookieEncryptionKey
+}))
+
+// register regenerate & save after the cookieSession middleware initialization
+app.use(function(request, response, next) {
+    if (request.session && !request.session.regenerate) {
+        request.session.regenerate = (cb) => {
+            cb()
+        }
+    }
+    if (request.session && !request.session.save) {
+        request.session.save = (cb) => {
+            cb()
+        }
+    }
+    next()
+})
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -25,6 +47,10 @@ mongoose.connect(`mongodb+srv://RJ36l5:vsaHikMWieXgVdx1@cluster0.vwbpndz.mongodb
 
 app.use("/static", express.static(path.join(__dirname, 'public')));
 
+app.get('/', (req, res) => {
+    res.render('index');
+})
+
 app.get('/login', (req, res) => {
     res.render('login');
 })
@@ -41,7 +67,7 @@ app.post('/login', (req, res, next) => {
             if(err) { return next(err); }
             res.redirect('/');
         })
-    })
+    })(req, res, next)
 })
 
 app.get('/signup', (req, res) => {
