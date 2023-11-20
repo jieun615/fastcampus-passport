@@ -7,6 +7,8 @@ const User = require('./models/users.model');
 const passport = require('passport');
 const { checkAuthenticated, checkNotAuthenticated } = require('./middlewares/auth');
 const cookieEncryptionKey = ['key1', 'key2'];
+require('dotenv').config();
+
 
 app.use(cookieSession({
     name: 'cookie-session-name',
@@ -38,7 +40,8 @@ app.use(express.urlencoded({ extended: false}));
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
-mongoose.connect(`mongodb+srv://RJ36l5:vsaHikMWieXgVdx1@cluster0.vwbpndz.mongodb.net/?retryWrites=true&w=majority`)
+// mongoose.connect(`mongodb+srv://je060105:V6q03leuExrnJW36@cluster0.deop4gj.mongodb.net/`)
+mongoose.connect(process.env.DB_NAME)
     .then(() => {
         console.log('mongodb connected')
     })
@@ -95,6 +98,12 @@ app.post('/signup', async (req, res) => {
         console.error(error);
     }
 })
+
+app.get('/auth/google', passport.authenticate('google'))
+app.get('/auth/google/callback', passport.authenticate('google', {
+    successReturnToOrRedirect: '/',
+    failureRedirect: '/login',
+}))
 
 const port = 3000;
 app.listen(port, () => {

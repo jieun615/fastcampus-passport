@@ -29,6 +29,8 @@ userSchema.pre('save', function (next) {
                 next();
             })
         })
+    } else {
+        next();
     }
 })
 

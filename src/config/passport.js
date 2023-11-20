@@ -1,6 +1,8 @@
 const passport = require('passport');
 const User = require('../models/users.model')
 const LocalStrategy = require('passport-local').Strategy;
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
+require('dotenv').config();
 
 passport.serializeUser((user, done) => {
     done(null, user.id);
@@ -13,7 +15,7 @@ passport.deserializeUser((id, done) => {
     })
 })
 
-passport.use('local', new LocalStrategy({ usernameField: 'email', passwordField: 'password'}, (email, password, done) => {
+const localStrategyConfig =  new LocalStrategy({ usernameField: 'email', passwordField: 'password'}, (email, password, done) => {
     User.findOne({ email: email.toLocaleLowerCase() })
         .then(user => {
             if(!user) {
@@ -31,8 +33,62 @@ passport.use('local', new LocalStrategy({ usernameField: 'email', passwordField:
         .catch((err)=>{
             return res.status(400).send(err);
         }) 
-    })
+    }
+)
+
+passport.use('local', localStrategyConfig);
+
+const googleClientID = process.env.DB_googleClientID
+const googleClientSecret = process.env.DB_googleClientSecret
+const googleStrategyConfig = new GoogleStrategy({
+    clientID: googleClientID,
+    clientSecret: googleClientSecret,
+    callbackURL: '/auth/google/callback',
+    scope: ['email', 'profile']
+}, async (accessToken, refreshToken, profile, done) => {
+    const existingUser = await User.findOne({googleId: profile.id})
+        if(existingUser) {
+            return done(null, existingUser);
+        } else {
+            const user = new User();
+            user.email = profile.emails[0].value;
+            user.googleId = profile.id;
+            try{
+                await user.save();
+            } catch(err){
+                console.log(err);
+                return done(err);
+            }
+            done(null, user);
+        }
+    }
 )
 
 
+/*
+const googleStrategyconfig = new GoogleStrategy({
+  clientID: 'test',
+  clientSecret: 'test',
+  callbackURL: '/test/test/callback',
+  scope: ['email','profile'],
+}, async (accessToken, refreshToken, profile, done) => { // 여기서 google 라이브러리가 반환타입이 Promise<?> 형태인걸 안받는다하면 머리 아파지는거고
+  const existingUser = await User.findOne({ googleId: profile.id })
 
+  if(existingUser) {
+    return done(null, existingUser);
+  } else {
+    const user = new User();
+    user.email = 'test@example.com';
+    
+    try {
+      await user.save()
+    } catch (err) {
+      console.log(err);
+
+      return done(err)
+    }
+
+    done(null, user);
+  }
+})*/
+passport.use('google', googleStrategyConfig);
