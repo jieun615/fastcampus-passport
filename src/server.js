@@ -3,12 +3,14 @@ const express = require('express');
 const { default: mongoose } = require('mongoose');
 const app = express();
 const path = require('path');
-const User = require('./models/users.model');
 const passport = require('passport');
 const { checkAuthenticated, checkNotAuthenticated } = require('./middlewares/auth');
 const cookieEncryptionKey = ['key1', 'key2'];
-require('dotenv').config();
+const mainRouter = require('./routers/main.router');
+const usersRouter = require('./routers/user.router');
+const port = 3000;
 
+require('dotenv').config();
 
 app.use(cookieSession({
     name: 'cookie-session-name',
@@ -40,8 +42,7 @@ app.use(express.urlencoded({ extended: false}));
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
-// mongoose.connect(`mongodb+srv://je060105:V6q03leuExrnJW36@cluster0.deop4gj.mongodb.net/`)
-mongoose.connect(process.env.DB_NAME)
+mongoose.connect(process.env.MONGO_URL)
     .then(() => {
         console.log('mongodb connected')
     })
@@ -51,61 +52,9 @@ mongoose.connect(process.env.DB_NAME)
 
 app.use("/static", express.static(path.join(__dirname, 'public')));
 
-app.get('/', checkAuthenticated, (req, res) => {
-    res.render('index');
-})
+app.use('/', mainRouter);
+app.use('/auth', usersRouter);
 
-app.get('/login', checkNotAuthenticated, (req, res) => {
-    res.render('login');
-})
-
-app.post('/login', (req, res, next) => {
-    passport.authenticate("local", (err, user, info) => {
-        if(err) {
-            return next(err);
-        }
-        if(!user) {
-            return res.json({ msg: info})
-        }
-        req.logIn(user, function (err) {
-            if(err) { return next(err); }
-            res.redirect('/');
-        })
-    })(req, res, next)
-})
-
-app.post('/logout', (req, res, next) => {
-    req.logOut(function (err) {
-        if(err) { return next(err); }
-        res.redirect('/login');
-    })
-})
-
-app.get('/signup', checkNotAuthenticated, (req, res) => {
-    res.render('signup');
-})
-
-app.post('/signup', async (req, res) => {
-    //유저 객체 생성
-    const user = new User(req.body)
-    try{
-        //유저 컬랙션에 유저를 저장
-        await user.save();
-        return res.status(200).json({
-            success: true
-        })
-    } catch (error) {
-        console.error(error);
-    }
-})
-
-app.get('/auth/google', passport.authenticate('google'))
-app.get('/auth/google/callback', passport.authenticate('google', {
-    successReturnToOrRedirect: '/',
-    failureRedirect: '/login',
-}))
-
-const port = 3000;
 app.listen(port, () => {
     console.log(`listening on ${port}`);
 });

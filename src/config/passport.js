@@ -38,8 +38,8 @@ const localStrategyConfig =  new LocalStrategy({ usernameField: 'email', passwor
 
 passport.use('local', localStrategyConfig);
 
-const googleClientID = process.env.DB_googleClientID
-const googleClientSecret = process.env.DB_googleClientSecret
+const googleClientID = process.env.GOOGLE_CLIENT_ID
+const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET
 const googleStrategyConfig = new GoogleStrategy({
     clientID: googleClientID,
     clientSecret: googleClientSecret,
@@ -64,31 +64,4 @@ const googleStrategyConfig = new GoogleStrategy({
     }
 )
 
-
-/*
-const googleStrategyconfig = new GoogleStrategy({
-  clientID: 'test',
-  clientSecret: 'test',
-  callbackURL: '/test/test/callback',
-  scope: ['email','profile'],
-}, async (accessToken, refreshToken, profile, done) => { // 여기서 google 라이브러리가 반환타입이 Promise<?> 형태인걸 안받는다하면 머리 아파지는거고
-  const existingUser = await User.findOne({ googleId: profile.id })
-
-  if(existingUser) {
-    return done(null, existingUser);
-  } else {
-    const user = new User();
-    user.email = 'test@example.com';
-    
-    try {
-      await user.save()
-    } catch (err) {
-      console.log(err);
-
-      return done(err)
-    }
-
-    done(null, user);
-  }
-})*/
 passport.use('google', googleStrategyConfig);
