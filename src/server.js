@@ -1,6 +1,6 @@
 const cookieSession = require('cookie-session');
 const express = require('express');
-const { default: mongoose } = require('mongoose');
+const mongoose = require('mongoose');
 const app = express();
 const path = require('path');
 const passport = require('passport');
