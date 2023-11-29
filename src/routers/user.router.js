@@ -1,6 +1,7 @@
 const express = require('express');
 const passport = require('passport');
 const User = require('../models/users.model');
+const sendMail = require('../mail/mail');
 const usersRouter = express.Router();
 
 usersRouter.post('/login', (req, res, next) => {
@@ -31,6 +32,8 @@ usersRouter.post('/signup', async (req, res) => {
     try{
         //유저 컬랙션에 유저를 저장
         await user.save();
+        //이메일 보내기
+        sendMail('받는 사람 이메일', '받는 사람 이름', 'welcome');
         res.redirect('/login');
     } catch (error) {
         console.error(error);
@@ -43,5 +46,12 @@ usersRouter.get('/google/callback', passport.authenticate('google', {
     successReturnToOrRedirect: '/',
     failureRedirect: '/login',
 }))
+
+usersRouter.get('/kakao', passport.authenticate('kakao'));
+
+usersRouter.get('kakao/callback', passport.authenticate('kakao', {
+    successReturnToOrRedirect: '/',
+    failureRedirect: '/login'
+}));
 
 module.exports = usersRouter;
