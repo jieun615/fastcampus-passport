@@ -49,7 +49,7 @@ usersRouter.get('/google/callback', passport.authenticate('google', {
 
 usersRouter.get('/kakao', passport.authenticate('kakao'));
 
-usersRouter.get('kakao/callback', passport.authenticate('kakao', {
+usersRouter.get('/kakao/callback', passport.authenticate('kakao', {
     successReturnToOrRedirect: '/',
     failureRedirect: '/login'
 }));
