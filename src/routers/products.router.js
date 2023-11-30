@@ -11,5 +11,10 @@ productsRouter.post('/', function(req, res){
 productsRouter.post('/:productId', function(req, res){
     productsController.getProductsById
 });
-
+productsRouter.put('/:productId', function(req, res){
+    productsController.updateProduct
+});
+productsRouter.delete('/:productId', function(req, res){
+    productsController.deleteProduct
+});
 module.exports = productsRouter;
