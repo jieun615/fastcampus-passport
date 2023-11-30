@@ -8,6 +8,7 @@ const { checkAuthenticated, checkNotAuthenticated } = require('./middlewares/aut
 const cookieEncryptionKey = ['key1', 'key2'];
 const mainRouter = require('./routers/main.router');
 const usersRouter = require('./routers/user.router');
+const productsRouter = require('./routers/products.router');
 const port = 3000;
 
 require('dotenv').config();
@@ -54,6 +55,7 @@ app.use("/static", express.static(path.join(__dirname, 'public')));
 
 app.use('/', mainRouter);
 app.use('/auth', usersRouter);
+app.use('/products', productsRouter);
 
 app.listen(port, () => {
     console.log(`listening on ${port}`);
